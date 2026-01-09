@@ -3,38 +3,36 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use std::fs;
-    use std::env;
-
-    /// Helper to create a temp config directory for testing
-    fn setup_test_config() -> std::path::PathBuf {
-        let temp_dir = env::temp_dir().join(format!("sapo-test-{}", std::process::id()));
-        fs::create_dir_all(&temp_dir).unwrap();
-        temp_dir
-    }
-
-    /// Helper to clean up test config
-    fn cleanup_test_config(path: &std::path::Path) {
-        fs::remove_dir_all(path).ok();
-    }
 
     #[test]
     fn test_generate_device_id_format() {
         let device_id = generate_device_id();
-        
+
         // Should start with platform prefix
         #[cfg(target_os = "windows")]
-        assert!(device_id.starts_with("win_"), "Device ID should start with 'win_'");
-        
+        assert!(
+            device_id.starts_with("win_"),
+            "Device ID should start with 'win_'"
+        );
+
         #[cfg(target_os = "macos")]
-        assert!(device_id.starts_with("mac_"), "Device ID should start with 'mac_'");
-        
+        assert!(
+            device_id.starts_with("mac_"),
+            "Device ID should start with 'mac_'"
+        );
+
         #[cfg(target_os = "linux")]
-        assert!(device_id.starts_with("linux_"), "Device ID should start with 'linux_'");
-        
+        assert!(
+            device_id.starts_with("linux_"),
+            "Device ID should start with 'linux_'"
+        );
+
         // Should contain underscore separator
-        assert!(device_id.contains('_'), "Device ID should contain underscore");
-        
+        assert!(
+            device_id.contains('_'),
+            "Device ID should contain underscore"
+        );
+
         // Should be reasonably long (UUID is 36 chars + prefix)
         assert!(device_id.len() > 30, "Device ID should be at least 30 chars");
     }
@@ -43,7 +41,7 @@ mod tests {
     fn test_generate_device_id_unique() {
         let id1 = generate_device_id();
         let id2 = generate_device_id();
-        
+
         assert_ne!(id1, id2, "Each generated ID should be unique");
     }
 
@@ -51,16 +49,22 @@ mod tests {
     fn test_config_path_contains_sapo() {
         let config_path = get_config_path();
         let path_str = config_path.to_string_lossy();
-        
-        assert!(path_str.contains(".sapo"), "Config path should contain .sapo");
-        assert!(path_str.ends_with("config"), "Config path should end with 'config'");
+
+        assert!(
+            path_str.contains(".sapo"),
+            "Config path should contain .sapo"
+        );
+        assert!(
+            path_str.ends_with("config"),
+            "Config path should end with 'config'"
+        );
     }
 
     #[test]
     fn test_bin_dir_path() {
         let bin_dir = get_bin_dir();
         let path_str = bin_dir.to_string_lossy();
-        
+
         assert!(path_str.contains(".sapo"), "Bin dir should contain .sapo");
         assert!(path_str.ends_with("bin"), "Bin dir should end with 'bin'");
     }
@@ -87,7 +91,7 @@ mod tests {
             .filter(|s| !s.is_empty())
             .map(|s| s.to_string())
             .collect();
-        
+
         assert_eq!(trusted.len(), 3);
         assert!(trusted.contains(&"lodash".to_string()));
         assert!(trusted.contains(&"axios".to_string()));
@@ -102,15 +106,18 @@ mod tests {
             .filter(|s| !s.is_empty())
             .map(|s| s.to_string())
             .collect();
-        
-        assert!(trusted.is_empty(), "Empty string should result in empty list");
+
+        assert!(
+            trusted.is_empty(),
+            "Empty string should result in empty list"
+        );
     }
 
     #[test]
     fn test_config_line_parsing() {
         let line = "device_id=mac_abc123";
         let (key, value) = line.split_once('=').unwrap();
-        
+
         assert_eq!(key, "device_id");
         assert_eq!(value, "mac_abc123");
     }
@@ -119,7 +126,7 @@ mod tests {
     fn test_config_line_with_spaces() {
         let line = "  api_url  =  https://example.com  ";
         let (key, value) = line.split_once('=').unwrap();
-        
+
         assert_eq!(key.trim(), "api_url");
         assert_eq!(value.trim(), "https://example.com");
     }

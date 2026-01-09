@@ -27,7 +27,7 @@ fn get_stdout(output: &std::process::Output) -> String {
     String::from_utf8_lossy(&output.stdout).to_string()
 }
 
-/// Helper to get stderr as string  
+/// Helper to get stderr as string
 fn get_stderr(output: &std::process::Output) -> String {
     String::from_utf8_lossy(&output.stderr).to_string()
 }
@@ -40,19 +40,25 @@ fn get_stderr(output: &std::process::Output) -> String {
 fn test_cli_help() {
     let output = run_cli(&["--help"]);
     let stdout = get_stdout(&output);
-    
+
     assert!(output.status.success(), "Help should succeed");
     assert!(stdout.contains("sapo-cli"), "Should mention sapo-cli");
-    assert!(stdout.contains("USAGE") || stdout.contains("Usage"), "Should show usage");
+    assert!(
+        stdout.contains("USAGE") || stdout.contains("Usage"),
+        "Should show usage"
+    );
 }
 
 #[test]
 fn test_cli_version() {
     let output = run_cli(&["--version"]);
     let stdout = get_stdout(&output);
-    
+
     assert!(output.status.success(), "Version should succeed");
-    assert!(stdout.contains("1.0.0") || stdout.contains("sapo"), "Should show version");
+    assert!(
+        stdout.contains("1.0.0") || stdout.contains("sapo"),
+        "Should show version"
+    );
 }
 
 // ============================================
@@ -63,17 +69,20 @@ fn test_cli_version() {
 fn test_cli_status() {
     let output = run_cli(&["status"]);
     let stdout = get_stdout(&output);
-    
+
     assert!(output.status.success(), "Status should succeed");
     assert!(stdout.contains("Sapo"), "Should mention Sapo");
-    assert!(stdout.contains("Status") || stdout.contains("Active"), "Should show status");
+    assert!(
+        stdout.contains("Status") || stdout.contains("Active"),
+        "Should show status"
+    );
 }
 
 #[test]
 fn test_cli_status_shows_plan() {
     let output = run_cli(&["status"]);
     let stdout = get_stdout(&output);
-    
+
     // Should show plan (free or pro)
     assert!(
         stdout.contains("free") || stdout.contains("pro") || stdout.contains("Plan"),
@@ -89,7 +98,7 @@ fn test_cli_status_shows_plan() {
 fn test_cli_scan_help() {
     let output = run_cli(&["scan", "--help"]);
     let stdout = get_stdout(&output);
-    
+
     assert!(output.status.success(), "Scan help should succeed");
     assert!(
         stdout.to_lowercase().contains("package") || stdout.to_lowercase().contains("scan"),
@@ -100,11 +109,13 @@ fn test_cli_scan_help() {
 #[test]
 fn test_cli_scan_no_package() {
     let output = run_cli(&["scan"]);
-    
+
     // Should fail or show error when no package provided
     let combined = format!("{}{}", get_stdout(&output), get_stderr(&output));
     assert!(
-        !output.status.success() || combined.to_lowercase().contains("error") || combined.to_lowercase().contains("required"),
+        !output.status.success()
+            || combined.to_lowercase().contains("error")
+            || combined.to_lowercase().contains("required"),
         "Should require package argument"
     );
 }
@@ -115,20 +126,21 @@ fn test_cli_scan_format() {
     // Test that the scan command accepts a package name
     // This may fail with network error, which is fine for structure test
     let output = run_cli(&["scan", "lodash"]);
-    
+
     let stdout = get_stdout(&output);
     let stderr = get_stderr(&output);
     let combined = format!("{}{}", stdout, stderr);
-    
+
     // Should either scan or show network error, not crash
     assert!(
-        combined.contains("Scanning") || 
-        combined.contains("lodash") ||
-        combined.contains("error") ||
-        combined.contains("Error") ||
-        combined.contains("timeout") ||
-        combined.contains("network"),
-        "Should attempt to scan or show error, got: {}", combined
+        combined.contains("Scanning")
+            || combined.contains("lodash")
+            || combined.contains("error")
+            || combined.contains("Error")
+            || combined.contains("timeout")
+            || combined.contains("network"),
+        "Should attempt to scan or show error, got: {}",
+        combined
     );
 }
 
@@ -139,7 +151,7 @@ fn test_cli_scan_format() {
 #[test]
 fn test_cli_trust_help() {
     let output = run_cli(&["trust", "--help"]);
-    
+
     assert!(output.status.success(), "Trust help should succeed");
 }
 
@@ -151,12 +163,12 @@ fn test_cli_trust_help() {
 fn test_cli_toggle() {
     let output = run_cli(&["toggle"]);
     let stdout = get_stdout(&output);
-    
+
     // Should show enabled or disabled
     assert!(
-        stdout.to_lowercase().contains("enabled") || 
-        stdout.to_lowercase().contains("disabled") ||
-        stdout.to_lowercase().contains("protection"),
+        stdout.to_lowercase().contains("enabled")
+            || stdout.to_lowercase().contains("disabled")
+            || stdout.to_lowercase().contains("protection"),
         "Should show toggle status"
     );
 }
@@ -169,12 +181,12 @@ fn test_cli_toggle() {
 fn test_cli_monitor_status() {
     let output = run_cli(&["monitor", "status"]);
     let stdout = get_stdout(&output);
-    
+
     // Should show monitoring status or Pro required
     assert!(
-        stdout.contains("Monitoring") || 
-        stdout.contains("Pro") ||
-        stdout.contains("monitoring"),
+        stdout.contains("Monitoring")
+            || stdout.contains("Pro")
+            || stdout.contains("monitoring"),
         "Should show monitoring info or Pro requirement"
     );
 }
@@ -186,7 +198,7 @@ fn test_cli_monitor_status() {
 #[test]
 fn test_cli_wrap_help() {
     let output = run_cli(&["wrap", "--help"]);
-    
+
     // Wrap is an internal command, may not have help
     // Just ensure it doesn't crash
     assert!(
@@ -202,7 +214,7 @@ fn test_cli_wrap_help() {
 #[test]
 fn test_cli_invalid_command() {
     let output = run_cli(&["invalidcommand123"]);
-    
+
     // Should fail with error
     assert!(
         !output.status.success() || get_stderr(&output).to_lowercase().contains("error"),
@@ -216,15 +228,15 @@ fn test_cli_no_args_shows_help_or_status() {
     let stdout = get_stdout(&output);
     let stderr = get_stderr(&output);
     let combined = format!("{}{}", stdout, stderr);
-    
+
     // Should show help or error, not crash
     assert!(
-        combined.contains("Usage") || 
-        combined.contains("usage") ||
-        combined.contains("USAGE") ||
-        combined.contains("help") ||
-        combined.contains("error") ||
-        combined.contains("Sapo"),
+        combined.contains("Usage")
+            || combined.contains("usage")
+            || combined.contains("USAGE")
+            || combined.contains("help")
+            || combined.contains("error")
+            || combined.contains("Sapo"),
         "No args should show usage or help"
     );
 }
@@ -237,7 +249,7 @@ fn test_cli_no_args_shows_help_or_status() {
 fn test_output_uses_colors_or_plain() {
     let output = run_cli(&["status"]);
     let stdout = get_stdout(&output);
-    
+
     // Should produce some output
     assert!(!stdout.is_empty(), "Status should produce output");
 }
@@ -246,8 +258,11 @@ fn test_output_uses_colors_or_plain() {
 fn test_output_no_panic_messages() {
     let output = run_cli(&["status"]);
     let stderr = get_stderr(&output);
-    
+
     // Should not contain panic messages
     assert!(!stderr.contains("panic"), "Should not panic");
-    assert!(!stderr.contains("RUST_BACKTRACE"), "Should not show backtrace hint");
+    assert!(
+        !stderr.contains("RUST_BACKTRACE"),
+        "Should not show backtrace hint"
+    );
 }
