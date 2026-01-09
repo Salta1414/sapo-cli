@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
 
 const DEFAULT_API_URL: &str = "https://admired-chickadee-733.convex.site";
 

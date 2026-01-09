@@ -5,7 +5,6 @@ mod sandbox;
 mod utils;
 
 use clap::{Parser, Subcommand};
-use colored::Colorize;
 
 #[derive(Parser)]
 #[command(name = "sapo-cli")]
@@ -113,7 +112,9 @@ fn main() {
 
     match cli.command {
         Commands::Status => commands::status::run(),
-        Commands::Scan { package } => commands::scan::run(&package, true),
+        Commands::Scan { package } => {
+            commands::scan::run(&package, true);
+        }
         Commands::Trust { package } => commands::trust::add(&package),
         Commands::Untrust { package } => commands::trust::remove(&package),
         Commands::Trusted => commands::trust::list(),

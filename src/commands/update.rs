@@ -1,5 +1,4 @@
 use crate::utils::*;
-use colored::Colorize;
 
 pub fn run() {
     println!();
