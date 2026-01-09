@@ -58,7 +58,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         
       - name: Run unit tests
-        run: cargo test --lib --verbose
+        run: cargo test --bins --verbose
 
   # ============================================
   # Integration Tests (per platform)
