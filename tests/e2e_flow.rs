@@ -204,9 +204,7 @@ fn test_e2e_scan_with_version() {
 
     // Should attempt to scan specific version
     assert!(
-        combined.contains("1.6.0")
-            || combined.contains("axios")
-            || combined.contains("Scanning"),
+        combined.contains("1.6.0") || combined.contains("axios") || combined.contains("Scanning"),
         "Should scan specific version: {}",
         combined
     );

@@ -184,9 +184,7 @@ fn test_cli_monitor_status() {
 
     // Should show monitoring status or Pro required
     assert!(
-        stdout.contains("Monitoring")
-            || stdout.contains("Pro")
-            || stdout.contains("monitoring"),
+        stdout.contains("Monitoring") || stdout.contains("Pro") || stdout.contains("monitoring"),
         "Should show monitoring info or Pro requirement"
     );
 }
