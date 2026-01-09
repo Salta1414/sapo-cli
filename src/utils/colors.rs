@@ -2,10 +2,22 @@ use colored::Colorize;
 
 pub fn print_header() {
     println!();
-    println!("{}", "  +--------------------------------------------+".green());
-    println!("{}", "  |  Sapo CLI v1.0.0                           |".green());
-    println!("{}", "  |  Pre-install protection for npm packages   |".green());
-    println!("{}", "  +--------------------------------------------+".green());
+    println!(
+        "{}",
+        "  +--------------------------------------------+".green()
+    );
+    println!(
+        "{}",
+        "  |  Sapo CLI v1.0.0                           |".green()
+    );
+    println!(
+        "{}",
+        "  |  Pre-install protection for npm packages   |".green()
+    );
+    println!(
+        "{}",
+        "  +--------------------------------------------+".green()
+    );
     println!();
 }
 
