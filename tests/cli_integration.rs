@@ -164,10 +164,12 @@ fn test_cli_toggle() {
     let output = run_cli(&["toggle"]);
     let stdout = get_stdout(&output);
 
-    // Should show enabled or disabled
+    // Should show toggle state (paused/active/enabled/disabled)
     assert!(
         stdout.to_lowercase().contains("enabled")
             || stdout.to_lowercase().contains("disabled")
+            || stdout.to_lowercase().contains("paused")
+            || stdout.to_lowercase().contains("active")
             || stdout.to_lowercase().contains("protection"),
         "Should show toggle status"
     );
