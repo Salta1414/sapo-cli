@@ -1,4 +1,5 @@
 use crate::utils::*;
+use colored::Colorize;
 use std::env;
 
 pub fn disable() {
@@ -21,4 +22,11 @@ pub fn enable() {
     );
 }
 
-use colored::Colorize;
+pub fn toggle() {
+    // Check current state and toggle
+    if env::var("SAPO_DISABLED").is_ok() {
+        enable();
+    } else {
+        disable();
+    }
+}

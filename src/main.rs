@@ -48,6 +48,9 @@ enum Commands {
     /// Re-enable protection
     Enable,
 
+    /// Toggle protection on/off
+    Toggle,
+
     /// Sync Pro features from server
     Sync,
 
@@ -120,6 +123,7 @@ fn main() {
         Commands::Trusted => commands::trust::list(),
         Commands::Disable => commands::toggle::disable(),
         Commands::Enable => commands::toggle::enable(),
+        Commands::Toggle => commands::toggle::toggle(),
         Commands::Sync => commands::sync::run(),
         Commands::Login => commands::login::run(),
         Commands::Upgrade => commands::upgrade::run(),
