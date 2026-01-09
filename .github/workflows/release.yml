@@ -1,0 +1,102 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0
+  workflow_dispatch:  # Manual trigger
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          # macOS Intel
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: sapo-cli-macos-x64
+            
+          # macOS ARM (M1/M2/M3)
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: sapo-cli-macos-arm64
+            
+          # Linux x64
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: sapo-cli-linux-x64
+            
+          # Windows x64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: sapo-cli-windows-x64.exe
+            
+          # Windows ARM64
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            artifact: sapo-cli-windows-arm64.exe
+
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+          
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+        
+      - name: Rename binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cp target/${{ matrix.target }}/release/sapo-cli ${{ matrix.artifact }}
+          chmod +x ${{ matrix.artifact }}
+          
+      - name: Rename binary (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          copy target\${{ matrix.target }}\release\sapo-cli.exe ${{ matrix.artifact }}
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+          retention-days: 7
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: binaries
+          
+      - name: List binaries
+        run: |
+          echo "=== Downloaded binaries ==="
+          find binaries -type f -ls
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            binaries/sapo-cli-macos-x64/sapo-cli-macos-x64
+            binaries/sapo-cli-macos-arm64/sapo-cli-macos-arm64
+            binaries/sapo-cli-linux-x64/sapo-cli-linux-x64
+            binaries/sapo-cli-windows-x64.exe/sapo-cli-windows-x64.exe
+            binaries/sapo-cli-windows-arm64.exe/sapo-cli-windows-arm64.exe
