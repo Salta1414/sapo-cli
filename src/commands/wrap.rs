@@ -89,9 +89,8 @@ fn should_use_runtime_monitoring() -> bool {
 /// Auto-sync Pro modules if user is Pro but not synced
 fn auto_sync_pro() {
     if !config::is_pro() {
-        return;
+        // Not a Pro user, nothing to sync
     }
-
     // Pro features are now embedded in the binary
     // Just verify Pro status is current
 }

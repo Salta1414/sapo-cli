@@ -195,7 +195,7 @@ fn collect_behavior_linux(sandbox_dir: &PathBuf, pkg_spec: &str) -> Option<Sandb
     // Parse strace output
     if let Ok(file) = fs::File::open(&strace_log) {
         let reader = std::io::BufReader::new(file);
-        for line in reader.lines().flatten() {
+        for line in reader.lines().map_while(Result::ok) {
             // Parse file access
             if line.contains("open") {
                 if let Some(file_path) = extract_quoted_string(&line) {
@@ -277,7 +277,7 @@ fn collect_behavior_windows(sandbox_dir: &PathBuf, pkg_spec: &str) -> Option<San
 }
 
 /// Static analysis of node_modules for suspicious patterns
-fn analyze_node_modules(sandbox_dir: &PathBuf, behavior: &mut SandboxBehavior) {
+fn analyze_node_modules(sandbox_dir: &std::path::Path, behavior: &mut SandboxBehavior) {
     let node_modules = sandbox_dir.join("node_modules");
     if !node_modules.exists() {
         return;

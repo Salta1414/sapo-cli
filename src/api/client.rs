@@ -29,8 +29,10 @@ pub struct ScanResponse {
 
 #[derive(Debug, Deserialize)]
 pub struct SandboxFlag {
+    #[allow(dead_code)]
     pub flag: Option<String>,
     pub detail: Option<String>,
+    #[allow(dead_code)]
     pub score: Option<i32>,
 }
 
@@ -95,6 +97,7 @@ pub struct SandboxAnalyzeResponse {
     #[serde(rename = "riskLevel")]
     pub risk_level: Option<String>,
     pub flags: Option<Vec<SandboxFlag>>,
+    #[allow(dead_code)]
     pub cached: Option<bool>,
 }
 

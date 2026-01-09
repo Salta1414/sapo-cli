@@ -191,7 +191,7 @@ pub fn show_threats(count: usize) {
     };
 
     let reader = BufReader::new(file);
-    let lines: Vec<String> = reader.lines().filter_map(|l| l.ok()).collect();
+    let lines: Vec<String> = reader.lines().map_while(Result::ok).collect();
 
     if lines.is_empty() {
         print_info("No threats logged yet");

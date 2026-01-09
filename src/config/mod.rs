@@ -19,6 +19,7 @@ pub fn get_config_path() -> PathBuf {
 }
 
 /// Get the bin directory (~/.sapo/bin)
+#[allow(dead_code)]
 pub fn get_bin_dir() -> PathBuf {
     get_config_dir().join("bin")
 }

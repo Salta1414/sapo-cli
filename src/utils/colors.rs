@@ -1,5 +1,6 @@
 use colored::Colorize;
 
+#[allow(dead_code)]
 pub fn print_header() {
     println!();
     println!(
@@ -45,6 +46,7 @@ pub fn print_detail(msg: &str) {
     println!("     {} {}", "|-".bright_black(), msg.bright_black());
 }
 
+#[allow(dead_code)]
 pub fn print_tree_end(msg: &str) {
     println!("  {} {}", "+-".bright_black(), msg.bright_black());
 }
