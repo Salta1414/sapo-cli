@@ -11,24 +11,24 @@ pub fn run(manager: &str, args: &[String]) {
         run_original_command(manager, args, false);
         return;
     }
-    
+
     let cmd = args.first().map(|s| s.as_str()).unwrap_or("");
-    
+
     // Only intercept install commands
     let is_install = match manager {
         "npm" | "pnpm" | "bun" => matches!(cmd, "install" | "i" | "add"),
         "yarn" => matches!(cmd, "add") || (cmd == "install" || cmd.is_empty()),
         _ => false,
     };
-    
+
     if !is_install {
         run_original_command(manager, args, false);
         return;
     }
-    
+
     // Auto-sync Pro if needed
     auto_sync_pro();
-    
+
     // Extract packages from args (skip flags and the command itself)
     let packages: Vec<&str> = args
         .iter()
@@ -38,7 +38,7 @@ pub fn run(manager: &str, args: &[String]) {
         .filter(|arg| !arg.starts_with('/'))
         .map(|s| s.as_str())
         .collect();
-    
+
     if packages.is_empty() {
         // No specific packages - scan lockfile
         if !scan_lockfile(manager) {
@@ -52,10 +52,10 @@ pub fn run(manager: &str, args: &[String]) {
             }
         }
     }
-    
+
     // Check if runtime monitoring should be enabled
     let use_monitoring = should_use_runtime_monitoring();
-    
+
     // Run the original command (with or without monitoring)
     run_original_command(manager, args, use_monitoring);
 }
@@ -66,23 +66,23 @@ fn should_use_runtime_monitoring() -> bool {
     if std::env::var("SAPO_MONITOR_DISABLED").is_ok() {
         return false;
     }
-    
+
     // Runtime monitoring is a Pro feature
     if !config::is_pro() {
         return false;
     }
-    
+
     // Check if monitoring is enabled in config
     if !monitor::is_monitoring_enabled() {
         return false;
     }
-    
+
     // Ensure monitor script exists (should have been downloaded via 'sapo monitor enable')
     if !monitor::monitor_script_exists() {
         // Script not found - user needs to run 'sapo monitor enable' first
         return false;
     }
-    
+
     true
 }
 
@@ -91,7 +91,7 @@ fn auto_sync_pro() {
     if !config::is_pro() {
         return;
     }
-    
+
     // Pro features are now embedded in the binary
     // Just verify Pro status is current
 }
@@ -104,13 +104,13 @@ fn scan_lockfile(manager: &str) -> bool {
         "yarn" => "yarn.lock",
         _ => return true,
     };
-    
+
     if !std::path::Path::new(lockfile).exists() {
         return true;
     }
-    
+
     print_info(&format!("Scanning {}...", lockfile));
-    
+
     // For now, just allow - batch scanning is complex
     // The server-side batch endpoint handles this better
     true
@@ -121,7 +121,7 @@ fn scan_lockfile(manager: &str) -> bool {
 fn run_original_command(manager: &str, args: &[String], use_monitoring: bool) {
     // Find the original command (not our wrapper)
     let exe = which::which(manager).ok();
-    
+
     // If monitoring is enabled, we need to run node with --require
     if use_monitoring {
         if let Some(exe_path) = &exe {
@@ -129,7 +129,7 @@ fn run_original_command(manager: &str, args: &[String], use_monitoring: bool) {
             return;
         }
     }
-    
+
     let mut cmd = if let Some(exe_path) = exe {
         Command::new(exe_path)
     } else {
@@ -147,14 +147,14 @@ fn run_original_command(manager: &str, args: &[String], use_monitoring: bool) {
             c
         }
     };
-    
+
     cmd.args(args)
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit());
-    
+
     let status = cmd.status();
-    
+
     if let Ok(status) = status {
         std::process::exit(status.code().unwrap_or(1));
     }
@@ -164,18 +164,18 @@ fn run_original_command(manager: &str, args: &[String], use_monitoring: bool) {
 fn run_with_monitoring(exe_path: &std::path::Path, args: &[String]) {
     let monitor_path = monitor::get_monitor_script_path();
     let monitor_str = monitor_path.to_string_lossy();
-    
+
     // Get device ID and API URL for reporting
     let device_id = config::get_device_id();
     let api_url = config::get_api_url();
     let threat_url = format!("{}/runtime/threat", api_url);
-    
+
     // Set NODE_OPTIONS to inject our monitor script
     // This works for npm, pnpm, yarn, bun (all Node.js based)
     let node_options = format!("--require \"{}\"", monitor_str);
-    
+
     print_info("Runtime monitoring active for this install");
-    
+
     let mut cmd = Command::new(exe_path);
     cmd.args(args)
         .env("NODE_OPTIONS", &node_options)
@@ -184,9 +184,9 @@ fn run_with_monitoring(exe_path: &std::path::Path, args: &[String]) {
         .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit());
-    
+
     let status = cmd.status();
-    
+
     if let Ok(status) = status {
         std::process::exit(status.code().unwrap_or(1));
     }

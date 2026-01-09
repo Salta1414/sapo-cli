@@ -7,17 +7,17 @@ use colored::Colorize;
 pub fn run() {
     println!();
     print_info("Checking Pro status...");
-    
+
     match api::check_pro_status() {
         Ok(response) => {
             if response.is_pro {
                 let plan = response.plan.as_deref().unwrap_or("pro");
                 print_ok(&format!("Pro status: Active ({})", plan));
                 config::set_config_value("plan", plan);
-                
+
                 // Sync Pro modules
                 sync_pro_modules();
-                
+
                 print_ok("Pro features: Enabled");
             } else {
                 println!("  {} Pro status: Free", "[>]".bright_black());
@@ -28,7 +28,7 @@ pub fn run() {
             print_warning("Could not check Pro status - API unreachable");
         }
     }
-    
+
     println!();
 }
 

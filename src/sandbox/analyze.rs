@@ -68,7 +68,10 @@ pub fn run_local_sandbox(package: &str, version: &str) {
 
     let behavior = behavior.unwrap();
 
-    println!("     {} (Sending to server for analysis...)", "".bright_black());
+    println!(
+        "     {} (Sending to server for analysis...)",
+        "".bright_black()
+    );
 
     // Send to server for scoring
     let request = SandboxAnalyzeRequest {

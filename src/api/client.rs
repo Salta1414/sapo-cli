@@ -110,11 +110,11 @@ fn build_url(endpoint: &str) -> String {
     let api_url = config::get_api_url();
     let device_id = config::get_device_id();
     let mut url = format!("{}/{}?device={}", api_url, endpoint, device_id);
-    
+
     if let Some(api_key) = config::get_api_key() {
         url.push_str(&format!("&key={}", api_key));
     }
-    
+
     url
 }
 
@@ -122,7 +122,7 @@ fn build_url(endpoint: &str) -> String {
 pub fn scan_package(package: &str) -> Result<ScanResponse, String> {
     let client = create_client().map_err(|e| e.to_string())?;
     let url = build_url(&format!("scan?package={}", package));
-    
+
     client
         .get(&url)
         .send()
@@ -135,7 +135,7 @@ pub fn scan_package(package: &str) -> Result<ScanResponse, String> {
 pub fn check_pro_status() -> Result<ProStatusResponse, String> {
     let client = create_client().map_err(|e| e.to_string())?;
     let url = build_url("pro/status");
-    
+
     client
         .get(&url)
         .send()
@@ -149,11 +149,11 @@ pub fn analyze_sandbox(request: &SandboxAnalyzeRequest) -> Result<SandboxAnalyze
     let client = create_client().map_err(|e| e.to_string())?;
     let api_url = config::get_api_url();
     let mut url = format!("{}/sandbox/analyze", api_url);
-    
+
     if let Some(api_key) = config::get_api_key() {
         url.push_str(&format!("?key={}", api_key));
     }
-    
+
     client
         .post(&url)
         .json(request)
@@ -167,23 +167,20 @@ pub fn analyze_sandbox(request: &SandboxAnalyzeRequest) -> Result<SandboxAnalyze
 pub fn download_pro_module(module_name: &str) -> Result<String, String> {
     let client = create_client().map_err(|e| e.to_string())?;
     let url = build_url(&format!("pro/module/{}", module_name));
-    
-    let response = client
-        .get(&url)
-        .send()
-        .map_err(|e| e.to_string())?;
-    
+
+    let response = client.get(&url).send().map_err(|e| e.to_string())?;
+
     if response.status() == 403 {
         return Err("Pro subscription required".to_string());
     }
-    
+
     if response.status() == 404 {
         return Err("Module not found".to_string());
     }
-    
+
     if !response.status().is_success() {
         return Err(format!("Download failed: {}", response.status()));
     }
-    
+
     response.text().map_err(|e| e.to_string())
 }

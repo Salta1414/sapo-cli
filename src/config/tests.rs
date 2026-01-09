@@ -34,7 +34,10 @@ mod tests {
         );
 
         // Should be reasonably long (UUID is 36 chars + prefix)
-        assert!(device_id.len() > 30, "Device ID should be at least 30 chars");
+        assert!(
+            device_id.len() > 30,
+            "Device ID should be at least 30 chars"
+        );
     }
 
     #[test]

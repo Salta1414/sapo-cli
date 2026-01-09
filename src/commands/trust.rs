@@ -22,7 +22,7 @@ pub fn remove(package: &str) {
 
 pub fn list() {
     let trusted = config::get_trusted();
-    
+
     if trusted.is_empty() {
         println!("  {}", "No trusted packages".bright_black());
     } else {

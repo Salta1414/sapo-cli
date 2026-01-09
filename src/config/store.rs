@@ -8,7 +8,7 @@ const DEFAULT_API_URL: &str = "https://admired-chickadee-733.convex.site";
 pub fn get_config() -> HashMap<String, String> {
     let config_path = super::get_config_path();
     let mut config = HashMap::new();
-    
+
     if let Ok(content) = fs::read_to_string(&config_path) {
         for line in content.lines() {
             if let Some((key, value)) = line.split_once('=') {
@@ -16,7 +16,7 @@ pub fn get_config() -> HashMap<String, String> {
             }
         }
     }
-    
+
     config
 }
 
@@ -35,13 +35,13 @@ pub fn set_config_value(key: &str, value: &str) {
     let config_path = super::get_config_path();
     let mut config = get_config();
     config.insert(key.to_string(), value.to_string());
-    
+
     let content: String = config
         .iter()
         .map(|(k, v)| format!("{}={}", k, v))
         .collect::<Vec<_>>()
         .join("\n");
-    
+
     fs::write(&config_path, content).ok();
 }
 
@@ -88,7 +88,12 @@ pub fn is_pro() -> bool {
 /// Get trusted packages as a Vec
 pub fn get_trusted() -> Vec<String> {
     get_config_value("trusted")
-        .map(|s| s.split(',').filter(|s| !s.is_empty()).map(|s| s.to_string()).collect())
+        .map(|s| {
+            s.split(',')
+                .filter(|s| !s.is_empty())
+                .map(|s| s.to_string())
+                .collect()
+        })
         .unwrap_or_default()
 }
 
@@ -108,9 +113,6 @@ pub fn add_trusted(package: &str) {
 
 /// Remove a package from trusted list
 pub fn remove_trusted(package: &str) {
-    let trusted: Vec<String> = get_trusted()
-        .into_iter()
-        .filter(|p| p != package)
-        .collect();
+    let trusted: Vec<String> = get_trusted().into_iter().filter(|p| p != package).collect();
     set_config_value("trusted", &trusted.join(","));
 }

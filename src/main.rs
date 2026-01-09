@@ -21,49 +21,49 @@ struct Cli {
 enum Commands {
     /// Show current status
     Status,
-    
+
     /// Scan a package for threats
     Scan {
         /// Package name to scan
         package: String,
     },
-    
+
     /// Add a package to the trusted list
     Trust {
         /// Package name to trust
         package: String,
     },
-    
+
     /// Remove a package from the trusted list
     Untrust {
         /// Package name to untrust
         package: String,
     },
-    
+
     /// Show all trusted packages
     Trusted,
-    
+
     /// Temporarily disable protection
     Disable,
-    
+
     /// Re-enable protection
     Enable,
-    
+
     /// Sync Pro features from server
     Sync,
-    
+
     /// Open login page to link device
     Login,
-    
+
     /// Open pricing page
     Upgrade,
-    
+
     /// Update to latest version
     Update,
-    
+
     /// Uninstall Sapo
     Uninstall,
-    
+
     /// Wrap a package manager command (internal use)
     Wrap {
         /// Package manager (npm, pnpm, yarn, bun)
@@ -72,7 +72,7 @@ enum Commands {
         #[arg(trailing_var_arg = true)]
         args: Vec<String>,
     },
-    
+
     /// Runtime monitoring commands (Layer 4)
     Monitor {
         #[command(subcommand)]
@@ -84,33 +84,33 @@ enum Commands {
 enum MonitorAction {
     /// Show runtime monitoring status
     Status,
-    
+
     /// Enable runtime monitoring for install commands
     Enable,
-    
+
     /// Disable runtime monitoring
     Disable,
-    
+
     /// Toggle runtime monitoring on/off
     Toggle,
-    
+
     /// Show recent runtime threats
     Threats {
         /// Number of threats to show
         #[arg(short, long, default_value = "20")]
         count: usize,
     },
-    
+
     /// Clear the threat log
     Clear,
 }
 
 fn main() {
     let cli = Cli::parse();
-    
+
     // Initialize config on first run
     config::init();
-    
+
     match cli.command {
         Commands::Status => commands::status::run(),
         Commands::Scan { package } => commands::scan::run(&package, true),
