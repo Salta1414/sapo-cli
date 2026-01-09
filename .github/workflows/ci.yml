@@ -8,10 +8,43 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
 
 jobs:
-  check:
-    name: Check & Test
+  # ============================================
+  # Code Quality Checks
+  # ============================================
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+        
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        
+      - name: Format check
+        run: cargo fmt -- --check
+        
+      - name: Clippy (lints)
+        run: cargo clippy --all-targets --all-features -- -D warnings
+        
+      - name: Check (compile)
+        run: cargo check --all-features
+
+  # ============================================
+  # Unit Tests
+  # ============================================
+  unit-tests:
+    name: Unit Tests
+    needs: quality
     runs-on: ubuntu-latest
     
     steps:
@@ -24,18 +57,78 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
         
-      - name: Check
-        run: cargo check --all-features
-        
-      - name: Clippy
-        run: cargo clippy -- -D warnings
-        
-      - name: Format check
-        run: cargo fmt -- --check
+      - name: Run unit tests
+        run: cargo test --lib --verbose
 
-  build-test:
+  # ============================================
+  # Integration Tests (per platform)
+  # ============================================
+  integration-tests:
+    name: Integration Tests (${{ matrix.os }})
+    needs: quality
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        
+      - name: Build debug binary
+        run: cargo build
+        
+      - name: Run integration tests
+        run: cargo test --test cli_integration --verbose
+        
+      - name: Run E2E tests (no network)
+        run: cargo test --test e2e_flow --verbose
+        # Note: Network tests are ignored by default
+
+  # ============================================
+  # Full E2E Tests (with network, manual only)
+  # ============================================
+  e2e-network-tests:
+    name: E2E Network Tests
+    needs: integration-tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'  # Only on manual trigger
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        
+      - name: Build debug binary
+        run: cargo build
+        
+      - name: Run ALL E2E tests (including network)
+        run: cargo test --test e2e_flow --verbose -- --include-ignored
+
+  # ============================================
+  # Build Release Binaries (all platforms)
+  # ============================================
+  build:
     name: Build (${{ matrix.os }})
-    needs: check
+    needs: [unit-tests, integration-tests]
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -52,8 +145,29 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
         
-      - name: Build
+      - name: Build release
         run: cargo build --release
         
-      - name: Test run
-        run: cargo run -- --help
+      - name: Test binary runs
+        run: cargo run --release -- --help
+        
+      - name: Test status command
+        run: cargo run --release -- status
+
+  # ============================================
+  # Security Audit
+  # ============================================
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+        
+      - name: Run security audit
+        run: cargo audit
+        continue-on-error: true  # Don't fail build on audit warnings

@@ -36,6 +36,10 @@ which = "6.0"
 # Lightweight regex for parsing
 regex-lite = "0.1"
 
+[dev-dependencies]
+# For integration tests
+tempfile = "3.10"
+
 [profile.release]
 opt-level = "z"     # Optimize for size
 lto = true          # Link-time optimization
