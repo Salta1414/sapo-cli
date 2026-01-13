@@ -135,7 +135,7 @@ fn remove_sapo_from_file(path: &PathBuf) -> Result<bool, std::io::Error> {
     }
 
     // Remove trailing empty lines
-    while new_lines.last().map_or(false, |l| l.trim().is_empty()) {
+    while new_lines.last().is_some_and(|l| l.trim().is_empty()) {
         new_lines.pop();
     }
 
